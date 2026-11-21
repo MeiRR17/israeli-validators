@@ -10,7 +10,7 @@ From the repository root, run a static HTTP server:
 
     python3 -m http.server 8000
 
-Open http://localhost:8000. Choose a format and enter a non-sensitive sample value. Your input is processed in the browser only. The application makes no remote validation requests.
+Open http://localhost:8000. Choose a format and enter a non-sensitive sample value. Switch to **Batch** to check up to 100 newline-separated values with a pass/fail count and a reason for each input line. The browser batch table deliberately shows **line numbers, not submitted identifiers**. Your input is processed in the browser only. The application makes no remote validation requests.
 
 ## Library
 
@@ -24,6 +24,16 @@ Requires modern JavaScript with ES modules; Node.js 22+ is recommended.
     const generic = validate('0501234567', 'mobile');
 
 Each validator returns an object with `valid`, `normalized`, and `reason`, plus optional structural fields for Israeli IBAN. The caller must not treat `valid: true` as proof of real-world issuance or account ownership.
+
+## Local batch validation
+
+    import { validateBatch, batchSummary } from './src/batch.js';
+    const result = validateBatch('000000000\n123456789', 'id');
+    const countsOnly = batchSummary(result);
+
+This function accepts **1–100 nonempty lines**, up to **10,000 characters** total, and returns one result per input with line number, validation outcome and reason. Input values are returned to the programmatic caller as part of the rows so the calling code can associate the outcome; do not log or persist them accidentally. The browser UI purposely does not display the input values in its batch results and does not export or upload submitted identifiers.
+
+The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
 
 ## Supported checks
 
@@ -44,6 +54,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 ## Files
 
 - `src/index.js` — normalization, input format checks and arithmetic checksums
+- `src/batch.js` — bounded, local-only bulk checking and count-only summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
 - `LICENSE` — MIT
