@@ -41,9 +41,10 @@ function render(){
   title.textContent=outcome.valid?'Format or checksum matched.':'Value did not match the selected check.';
   const caveat=document.createElement('p');caveat.textContent=notes[kind].scope;
   node.append(tag,title,caveat);
-  if(outcome.normalized)node.append(resultDetail('Normalized value',outcome.normalized));
+  if(outcome.normalized && $('show-sensitive').checked)
+    node.append(resultDetail('Normalized value',outcome.normalized));
   if(!outcome.valid)node.append(resultDetail('Reason',outcome.reason||'invalid'));
-  if(kind==='iban'&&outcome.normalized){
+  if(kind==='iban'&&outcome.normalized&&$('show-sensitive').checked){
     node.append(resultDetail('Bank field',outcome.bankCode));
     node.append(resultDetail('Branch field',outcome.branchCode));
     node.append(resultDetail('Account field',outcome.accountNumber));
@@ -97,6 +98,7 @@ $('kind').addEventListener('change',()=>{
   const kind=$('kind').value;
   $('entry').value='';
   $('batch-entry').value='';
+  $('show-sensitive').checked=false;
   $('entry').placeholder=notes[kind].placeholder;
   $('field-note').textContent=notes[kind].desc;
   $('scope').textContent=notes[kind].scope;
@@ -107,10 +109,14 @@ for(const control of document.querySelectorAll('input[name="check-mode"]')){
     const batch=currentMode()==='batch';
     $('single-form').hidden=batch;
     $('batch-form').hidden=!batch;
+    $('show-sensitive').checked=false;
     empty();
   });
 }
 $('run').addEventListener('click',render);
+$('show-sensitive').addEventListener('change',()=>{
+  if(currentMode()==='single' && $('entry').value.trim())render();
+});
 $('entry').addEventListener('keydown',event=>{
   if(event.key==='Enter'){event.preventDefault();render();}
 });
@@ -121,6 +127,7 @@ $('entry').addEventListener('input',()=>{
 $('clear').addEventListener('click',()=>{
   $('entry').value='';
   $('batch-entry').value='';
+  $('show-sensitive').checked=false;
   empty();(currentMode()==='batch'?$('batch-entry'):$('entry')).focus();
 });
 
