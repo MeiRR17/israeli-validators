@@ -1,4 +1,5 @@
 import {validate} from './src/index.js';
+import {validateBatch,batchSummary} from './src/batch.js';
 const $=id=>document.getElementById(id);
 const notes={
   id:{placeholder:'e.g. 000000000',desc:'Israeli ID numbers may contain up to nine digits; leading zeroes are supported.',scope:'The ID checksum flags many common typing errors. A valid checksum does not prove that a number was issued or belongs to anyone.'},
@@ -13,7 +14,11 @@ function resultDetail(name,value){
   const val=document.createElement('code');val.textContent=value;
   row.append(label,val);return row;
 }
+function currentMode(){return document.querySelector('input[name="check-mode"]:checked')?.value||'single';}
 function empty(){
+  $('batch-results').hidden=true;
+  $('batch-results').replaceChildren();
+  $('result').hidden=false;
   $('result').className='result-empty';$('result').replaceChildren();
   const icon=document.createElement('div');icon.className='empty-icon';icon.textContent='▤';
   const h=document.createElement('h3');h.textContent='Nothing checked yet';
@@ -21,6 +26,7 @@ function empty(){
   $('result').append(icon,h,p);
 }
 function render(){
+  if(currentMode()==='batch'){renderBatch();return;}
   const raw=$('entry').value,kind=$('kind').value;
   if(!raw.trim()){empty();return;}
   const outcome=validate(raw,kind);
@@ -39,21 +45,72 @@ function render(){
     node.append(resultDetail('Account field',outcome.accountNumber));
   }
 }
+function renderBatch(){
+  const pane=$('batch-results');
+  pane.replaceChildren();
+  try{
+    const data=validateBatch($('batch-entry').value,$('kind').value);
+    const summary=batchSummary(data);
+    const heading=document.createElement('h3');
+    heading.textContent='Batch results: '+summary.passed+' passed, '+summary.failed+
+      ' did not pass (out of '+summary.total+').';
+    const caution=document.createElement('p');
+    caution.textContent='Results describe only format or checksum plausibility; they do not verify issuance, identity or ownership.';
+    const table=document.createElement('table');table.className='bulk-table';
+    const head=document.createElement('thead');
+    const headerRow=document.createElement('tr');
+    for(const label of ['Input line','Status','Reason']){
+      const cell=document.createElement('th');cell.scope='col';cell.textContent=label;headerRow.append(cell);
+    }
+    head.append(headerRow);table.append(head);
+    const body=document.createElement('tbody');
+    for(const row of data.rows){
+      const tr=document.createElement('tr');
+      for(const [index,value] of [String(row.line),row.valid?'Passes format/checksum':'Does not pass',row.reason||'—'].entries()){
+        const cell=document.createElement('td');
+        cell.textContent=value;
+        if(index===1)cell.className=row.valid?'bulk-valid':'bulk-invalid';
+        tr.append(cell);
+      }
+      body.append(tr);
+    }
+    table.append(body);pane.append(heading,caution,table);
+    $('result').hidden=true;
+    pane.hidden=false;
+  }catch(error){
+    empty();
+    $('result').replaceChildren();
+    const text=document.createElement('p');
+    text.className='error-text';
+    text.textContent=error.message;
+    $('result').append(text);
+  }
+}
 $('kind').addEventListener('change',()=>{
   const kind=$('kind').value;
   $('entry').value='';
+  $('batch-entry').value='';
   $('entry').placeholder=notes[kind].placeholder;
   $('field-note').textContent=notes[kind].desc;
   $('scope').textContent=notes[kind].scope;
   empty();
 });
+for(const control of document.querySelectorAll('input[name="check-mode"]')){
+  control.addEventListener('change',()=>{
+    const batch=currentMode()==='batch';
+    $('single-form').hidden=batch;
+    $('batch-form').hidden=!batch;
+    empty();
+  });
+}
 $('run').addEventListener('click',render);
 $('entry').addEventListener('keydown',event=>{
   if(event.key==='Enter'){event.preventDefault();render();}
 });
+$('batch-entry').addEventListener('input',empty);
 $('entry').addEventListener('input',()=>{
   $('result').className='result-empty';empty();
 });
 $('clear').addEventListener('click',()=>{
-  $('entry').value='';empty();$('entry').focus();
+  $('entry').value='';empty();(currentMode()==='batch'?$('batch-entry'):$('entry')).focus();
 });
