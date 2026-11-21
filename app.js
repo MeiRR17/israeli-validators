@@ -1,5 +1,5 @@
 import {validate} from './src/index.js';
-import {validateBatch,batchSummary,batchAudit} from './src/batch.js';
+import {validateBatch,batchSummary,auditBatchInput} from './src/batch.js';
 const $=id=>document.getElementById(id);
 let lastAudit=null;
 const notes={
@@ -56,7 +56,8 @@ function renderBatch(){
   try{
     const data=validateBatch($('batch-entry').value,$('kind').value);
     const summary=batchSummary(data);
-    lastAudit=batchAudit(data);
+    // Recompute counts without creating an export object containing identifiers.
+    lastAudit=auditBatchInput($('batch-entry').value,$('kind').value);
     const heading=document.createElement('h3');
     heading.textContent='Batch results: '+summary.passed+' passed, '+summary.failed+
       ' did not pass (out of '+summary.total+').';
