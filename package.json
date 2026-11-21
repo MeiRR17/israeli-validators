@@ -1,0 +1,10 @@
+{
+  "name": "@meirr17/israeli-validators",
+  "version": "0.1.0",
+  "description": "Local format and checksum validators for common Israeli inputs",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "exports": { ".": "./src/index.js" },
+  "license": "MIT",
+  "files": ["src/", "index.html", "app.js", "styles.css", "README.md", "LICENSE"]
+}
