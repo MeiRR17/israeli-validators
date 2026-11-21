@@ -4,3 +4,8 @@
 
 /* Counts-only batch audit export; downloaded JSON contains no source values. */
 .batch-audit-actions{margin-top:16px;padding:14px;border:1px solid #dde8f5;border-radius:9px;background:#f7faff}.batch-audit-actions .button{max-width:100%;white-space:normal}.batch-audit-actions .helper{font-size:11px;line-height:1.6;margin:9px 0 0}.batch-audit-actions .button:focus-visible{outline:2px solid #3266ed;outline-offset:2px}@media(max-width:580px){.batch-audit-actions .button{width:100%}}
+
+/* Opt-in disclosure of normalized identifiers and extracted account fields. */
+.sensitive-toggle{display:flex;gap:9px;align-items:flex-start;margin:10px 0 15px;font-size:11px;line-height:1.6;color:#7a5f31;padding:10px 12px;border:1px solid #ecd9b0;border-radius:8px;background:#fffbef;cursor:pointer}
+.sensitive-toggle input{margin-top:2px;flex:0 0 auto;accent-color:#3467cd}
+.sensitive-toggle input:focus-visible{outline:2px solid #407fe6;outline-offset:2px}
