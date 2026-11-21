@@ -22,8 +22,19 @@
         <option value="phone">Phone number — format</option>
         <option value="postal">Postal code — 7-digit format</option>
       </select>
-      <label for="entry" class="field-label second">Value to check</label>
-      <input id="entry" type="text" spellcheck="false" autocomplete="off" placeholder="Enter the value here…" aria-describedby="field-note">
+      <div class="mode-picker" role="group" aria-label="Validation mode">
+        <label><input type="radio" name="check-mode" value="single" checked> Single value</label>
+        <label><input type="radio" name="check-mode" value="batch"> Batch (up to 100)</label>
+      </div>
+      <div id="single-form">
+        <label for="entry" class="field-label second">Value to check</label>
+        <input id="entry" type="text" spellcheck="false" autocomplete="off" placeholder="Enter the value here…" aria-describedby="field-note">
+      </div>
+      <div id="batch-form" hidden>
+        <label for="batch-entry" class="field-label second">Values to check, one per line</label>
+        <textarea id="batch-entry" rows="8" maxlength="10000" spellcheck="false" autocomplete="off" placeholder="Paste non-sensitive sample values, one per line"></textarea>
+        <p class="helper">Up to 100 non-empty lines. Empty lines are ignored; results and counts stay in this browser.</p>
+      </div>
       <p id="field-note" class="helper">Israeli ID numbers may contain up to nine digits; leading zeroes are supported.</p>
       <button type="button" id="run" class="button primary">Check value →</button>
       <button type="button" id="clear" class="button secondary">Clear</button>
@@ -32,10 +43,11 @@
     <section class="panel result">
       <div class="panel-head"><span class="step">02</span><div><h2>Result</h2><p>Syntax and checksum, not identity verification.</p></div></div>
       <div id="result" role="status" aria-live="polite" class="result-empty"><div class="empty-icon">▤</div><h3>Nothing checked yet</h3><p>Choose an input format and enter a sample value.</p></div>
+      <div id="batch-results" class="batch-results" hidden></div>
       <div class="explain"><h3>What this tells you</h3><p id="scope">The ID checksum can flag many common typing errors. A valid checksum does not prove the number was issued or belongs to anyone.</p></div>
     </section>
   </div>
-  <section class="details"><article><span>01</span><h3>Checksum ≠ identity</h3><p>ID and IBAN results check internal arithmetic or structure. They do not verify issuance, account ownership or eligibility.</p></article><article><span>02</span><h3>No network requests</h3><p>Your input is checked entirely in this browser without a remote lookup, server account or analytics.</p></article><article><span>03</span><h3>Reusable JavaScript</h3><p>Import the library in a form or run the local Node CLI for non-sensitive example values.</p></article></section>
+  <section class="details"><article><span>01</span><h3>Checksum ≠ identity</h3><p>ID and IBAN results check internal arithmetic or structure. They do not verify issuance, account ownership or eligibility.</p></article><article><span>02</span><h3>No network requests</h3><p>Your input is checked entirely in this browser without a remote lookup, server account or analytics. Bulk mode also never uploads input.</p></article><article><span>03</span><h3>Reusable JavaScript</h3><p>Import the library in a form or run the local Node CLI for non-sensitive example values.</p></article></section>
 </main>
 <footer><span>Israeli Validators · Open-source toolkit</span><span>Built by <a href="https://github.com/MeiRR17" target="_blank" rel="noopener noreferrer">Meir Dvir</a></span></footer>
 </body>
