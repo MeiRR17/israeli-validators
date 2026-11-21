@@ -123,6 +123,8 @@ $('entry').addEventListener('keydown',event=>{
 });
 $('batch-entry').addEventListener('input',empty);
 $('entry').addEventListener('input',()=>{
+  // Disclosure is specific to the current result, never to future values.
+  $('show-sensitive').checked=false;
   $('result').className='result-empty';empty();
 });
 $('clear').addEventListener('click',()=>{
