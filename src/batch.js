@@ -80,3 +80,44 @@ export function batchAudit(result) {
     advisory: 'Format/checksum validation only; no real-world issuance or ownership verified.',
   };
 }
+
+
+/**
+ * Counts-only validation directly from the input string. Unlike
+ * validateBatch(), this function never constructs or returns row objects
+ * containing the entered identifiers or account numbers.
+ */
+export function auditBatchInput(lines, kind) {
+  if (typeof lines !== 'string' || lines.length > MAX_LENGTH) {
+    throw new RangeError('Bulk input must be text of at most 10,000 characters.');
+  }
+  if (!Object.hasOwn(validators, kind)) throw new RangeError('Unsupported input type.');
+  const counts = new Map();
+  let total = 0, passed = 0;
+  for (const raw of lines.split(/\r\n?|\n/u)) {
+    const value = raw.trim();
+    if (!value) continue;
+    total++;
+    if (total > MAX_ENTRIES) throw new RangeError('Enter no more than 100 non-empty lines.');
+    const outcome = validate(value, kind);
+    if (outcome.valid) {
+      passed++;
+    } else {
+      const reason = typeof outcome.reason === 'string' && /^[a-z0-9_]{1,80}$/u.test(outcome.reason)
+        ? outcome.reason : 'other_invalid';
+      counts.set(reason, (counts.get(reason) ?? 0) + 1);
+    }
+  }
+  if (!total) throw new RangeError('Enter one or more values.');
+  return {
+    format: 'israeli-validators-batch-audit-v1',
+    kind,
+    total,
+    passed,
+    failed: total - passed,
+    invalidReasons: [...counts.entries()]
+      .sort(([a], [b]) => a.localeCompare(b, 'en'))
+      .map(([reason, count]) => ({ reason, count })),
+    advisory: 'Format/checksum validation only; no real-world issuance or ownership verified.',
+  };
+}
