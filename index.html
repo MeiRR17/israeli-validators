@@ -44,6 +44,10 @@
       <div class="panel-head"><span class="step">02</span><div><h2>Result</h2><p>Syntax and checksum, not identity verification.</p></div></div>
       <div id="result" role="status" aria-live="polite" class="result-empty"><div class="empty-icon">▤</div><h3>Nothing checked yet</h3><p>Choose an input format and enter a sample value.</p></div>
       <div id="batch-results" class="batch-results" hidden></div>
+      <div id="batch-audit-actions" class="batch-audit-actions" hidden>
+        <button type="button" id="download-audit" class="button secondary" disabled>↓ Download counts-only JSON report</button>
+        <p class="helper">This report contains counts and failure reasons only, not identifiers or entered values.</p>
+      </div>
       <div class="explain"><h3>What this tells you</h3><p id="scope">The ID checksum can flag many common typing errors. A valid checksum does not prove the number was issued or belongs to anyone.</p></div>
     </section>
   </div>
