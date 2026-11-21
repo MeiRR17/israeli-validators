@@ -1,6 +1,7 @@
 import {validate} from './src/index.js';
-import {validateBatch,batchSummary} from './src/batch.js';
+import {validateBatch,batchSummary,batchAudit} from './src/batch.js';
 const $=id=>document.getElementById(id);
+let lastAudit=null;
 const notes={
   id:{placeholder:'e.g. 000000000',desc:'Israeli ID numbers may contain up to nine digits; leading zeroes are supported.',scope:'The ID checksum flags many common typing errors. A valid checksum does not prove that a number was issued or belongs to anyone.'},
   iban:{placeholder:'IL followed by 21 digits',desc:'Israeli IBAN: IL, two check digits, three-digit bank and branch codes, and a 13-digit account field.',scope:'The IBAN mod-97 checksum validates structure; it cannot establish that a bank or account exists, is active or belongs to a particular person.'},
@@ -16,6 +17,9 @@ function resultDetail(name,value){
 }
 function currentMode(){return document.querySelector('input[name="check-mode"]:checked')?.value||'single';}
 function empty(){
+  lastAudit=null;
+  $('batch-audit-actions').hidden=true;
+  $('download-audit').disabled=true;
   $('batch-results').hidden=true;
   $('batch-results').replaceChildren();
   $('result').hidden=false;
@@ -51,6 +55,7 @@ function renderBatch(){
   try{
     const data=validateBatch($('batch-entry').value,$('kind').value);
     const summary=batchSummary(data);
+    lastAudit=batchAudit(data);
     const heading=document.createElement('h3');
     heading.textContent='Batch results: '+summary.passed+' passed, '+summary.failed+
       ' did not pass (out of '+summary.total+').';
@@ -77,6 +82,8 @@ function renderBatch(){
     table.append(body);pane.append(heading,caution,table);
     $('result').hidden=true;
     pane.hidden=false;
+    $('batch-audit-actions').hidden=false;
+    $('download-audit').disabled=false;
   }catch(error){
     empty();
     $('result').replaceChildren();
@@ -112,5 +119,21 @@ $('entry').addEventListener('input',()=>{
   $('result').className='result-empty';empty();
 });
 $('clear').addEventListener('click',()=>{
-  $('entry').value='';empty();(currentMode()==='batch'?$('batch-entry'):$('entry')).focus();
+  $('entry').value='';
+  $('batch-entry').value='';
+  empty();(currentMode()==='batch'?$('batch-entry'):$('entry')).focus();
+});
+
+
+$('download-audit').addEventListener('click',()=>{
+  if(!lastAudit)return;
+  const blob=new Blob([JSON.stringify(lastAudit,null,2)+'\n'],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download='validation-audit-counts.json';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
