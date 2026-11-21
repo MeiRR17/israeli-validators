@@ -10,7 +10,7 @@ From the repository root, run a static HTTP server:
 
     python3 -m http.server 8000
 
-Open http://localhost:8000. Choose a format and enter a non-sensitive sample value. Switch to **Batch** to check up to 100 newline-separated values with a pass/fail count and a reason for each input line. The browser batch table deliberately shows **line numbers, not submitted identifiers**. Your input is processed in the browser only. The application makes no remote validation requests.
+Open http://localhost:8000. Choose a format and enter a non-sensitive sample value. In single-value mode, full normalized identifiers and extracted IBAN bank/branch/account fields are **hidden by default**. Opt in using **Show the full normalized value** to reveal those details on-screen; this does not hide the value already typed in the form. Switch to **Batch** to check up to 100 newline-separated values with a pass/fail count and a reason for each input line. The browser batch table deliberately shows **line numbers, not submitted identifiers**. Your input is processed in the browser only. The application makes no remote validation requests.
 
 ## Library
 
@@ -41,9 +41,12 @@ Batch mode can download `validation-audit-counts.json`. It contains the selected
 
     import { batchAudit } from './src/batch.js';
     const audit = batchAudit(result);
+    // For privacy-oriented callers, avoid materializing identifier-bearing rows:
+    import { auditBatchInput } from './src/batch.js';
+    const directAudit = auditBatchInput('000000000\n123456789', 'id');
     // { format, kind, total, passed, failed, invalidReasons, advisory }
 
-Unlike the result rows returned by `validateBatch()`, the audit is suitable for sharing as aggregate data *when the count distribution itself is not sensitive*. Always review exports before publication. Blank input lines are ignored but line numbers for nonblank entries refer to their **original positions** in the input (not renumbered after removing blanks). Clear removes both single-value and batch-value input.
+`auditBatchInput()` validates lines and returns counts without constructing a `rows` array containing original values. The browser export uses this route. Unlike the result rows returned by `validateBatch()`, the audit is suitable for sharing as aggregate data *when the count distribution itself is not sensitive*. Always review exports before publication. Blank input lines are ignored but line numbers for nonblank entries refer to their **original positions** in the input (not renumbered after removing blanks). Clear removes both single-value and batch-value input.
 
 ## Supported checks
 
@@ -64,7 +67,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 ## Files
 
 - `src/index.js` — normalization, input format checks and arithmetic checksums
-- `src/batch.js` — bounded, local-only bulk checking and count-only summaries
+- `src/batch.js` — bounded, local-only bulk checking, direct aggregate-only audit and count-only summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
 - `LICENSE` — MIT
