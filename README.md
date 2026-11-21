@@ -35,6 +35,16 @@ This function accepts **1–100 nonempty lines**, up to **10,000 characters** to
 
 The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
 
+### Counts-only audit report
+
+Batch mode can download `validation-audit-counts.json`. It contains the selected validation kind, counts of passed/failed inputs and a per-reason failure breakdown. It contains **no submitted values**, no normalized identifiers and no per-line record details.
+
+    import { batchAudit } from './src/batch.js';
+    const audit = batchAudit(result);
+    // { format, kind, total, passed, failed, invalidReasons, advisory }
+
+Unlike the result rows returned by `validateBatch()`, the audit is suitable for sharing as aggregate data *when the count distribution itself is not sensitive*. Always review exports before publication. Blank input lines are ignored but line numbers for nonblank entries refer to their **original positions** in the input (not renumbered after removing blanks). Clear removes both single-value and batch-value input.
+
 ## Supported checks
 
 - **Israeli ID:** nine-digit mod-10 checksum with alternating factors 1 and 2. Input may be entered with up to nine digits and is padded with leading zeroes for the calculation. A passing checksum is not proof that an ID was issued.
