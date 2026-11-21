@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102033">
+<meta name="description" content="Offline input checks for Israeli ID checksums, IBAN checksums, phone formats and postal codes.">
+<title>Israeli Validators — practical input checks</title>
+<link rel="stylesheet" href="./styles.css"><script type="module" src="./app.js"></script>
+</head>
+<body>
+<header><a class="brand" href="./"><span class="brand-icon">✓</span><strong>israeli<span>validators</span></strong><small>form toolkit</small></a><a href="https://github.com/MeiRR17/israeli-validators" target="_blank" rel="noopener noreferrer">GitHub ↗</a></header>
+<main class="shell">
+  <section class="intro"><div class="eyebrow">PRACTICAL INPUT CHECKS · LOCAL BY DESIGN</div><h1>Validate formats. <em>Not people.</em></h1><p>Explore common Israeli ID, bank account and contact input checks. Runs on-device with explicit limitations and no data uploads.</p></section>
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-head"><span class="step">01</span><div><h2>Choose a validator</h2><p>Pick an input format to examine.</p></div></div>
+      <label for="kind" class="field-label">Input type</label>
+      <select id="kind">
+        <option value="id">Israeli ID number — checksum</option>
+        <option value="iban">Israeli IBAN — checksum</option>
+        <option value="mobile">Mobile phone — format</option>
+        <option value="phone">Phone number — format</option>
+        <option value="postal">Postal code — 7-digit format</option>
+      </select>
+      <label for="entry" class="field-label second">Value to check</label>
+      <input id="entry" type="text" spellcheck="false" autocomplete="off" placeholder="Enter the value here…" aria-describedby="field-note">
+      <p id="field-note" class="helper">Israeli ID numbers may contain up to nine digits; leading zeroes are supported.</p>
+      <button type="button" id="run" class="button primary">Check value →</button>
+      <button type="button" id="clear" class="button secondary">Clear</button>
+      <p class="confidential">◈ Do not enter real personal identification or financial information on devices you do not trust.</p>
+    </section>
+    <section class="panel result">
+      <div class="panel-head"><span class="step">02</span><div><h2>Result</h2><p>Syntax and checksum, not identity verification.</p></div></div>
+      <div id="result" role="status" aria-live="polite" class="result-empty"><div class="empty-icon">▤</div><h3>Nothing checked yet</h3><p>Choose an input format and enter a sample value.</p></div>
+      <div class="explain"><h3>What this tells you</h3><p id="scope">The ID checksum can flag many common typing errors. A valid checksum does not prove the number was issued or belongs to anyone.</p></div>
+    </section>
+  </div>
+  <section class="details"><article><span>01</span><h3>Checksum ≠ identity</h3><p>ID and IBAN results check internal arithmetic or structure. They do not verify issuance, account ownership or eligibility.</p></article><article><span>02</span><h3>No network requests</h3><p>Your input is checked entirely in this browser without a remote lookup, server account or analytics.</p></article><article><span>03</span><h3>Reusable JavaScript</h3><p>Import the library in a form or run the local Node CLI for non-sensitive example values.</p></article></section>
+</main>
+<footer><span>Israeli Validators · Open-source toolkit</span><span>Built by <a href="https://github.com/MeiRR17" target="_blank" rel="noopener noreferrer">Meir Dvir</a></span></footer>
+</body>
+</html>
