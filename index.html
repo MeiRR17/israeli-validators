@@ -38,6 +38,7 @@
         <label for="batch-entry" class="field-label second">Values to check, one per line</label>
         <textarea id="batch-entry" rows="8" maxlength="10000" spellcheck="false" autocomplete="off" placeholder="Paste non-sensitive sample values, one per line"></textarea>
         <p class="helper">Up to 100 non-empty lines. Empty lines are ignored; results and counts stay in this browser.</p>
+        <label class="sensitive-toggle"><input id="invalid-only" type="checkbox"> Show only failing lines in the on-screen batch table</label>
       </div>
       <p id="field-note" class="helper">Israeli ID numbers may contain up to nine digits; leading zeroes are supported.</p>
       <button type="button" id="run" class="button primary">Check value →</button>
@@ -52,7 +53,7 @@
         <button type="button" id="download-audit" class="button secondary" disabled>↓ Download counts-only JSON report</button>
         <button type="button" id="download-audit-csv" class="button secondary" disabled>↓ Download counts-only CSV</button>
         <button type="button" id="download-redacted" class="button secondary" disabled>↓ Download redacted line results CSV</button>
-        <p class="helper">The batch results also provide an expandable counts-only failure-reason breakdown. JSON and Counts CSV include only aggregate counts and reasons. The separate redacted line-results CSV contains original input line numbers, pass/fail status and reason codes, but no entered or normalized values. Even aggregate counts and line locations can be sensitive.</p>
+        <p class="helper">The batch results also provide an expandable counts-only failure-reason breakdown. JSON and Counts CSV include only aggregate counts and reasons. The separate redacted line-results CSV contains original input line numbers, pass/fail status and reason codes for all checked values, even when the on-screen table is filtered to failures only. No entered or normalized values are exported. Even aggregate counts and line locations can be sensitive.</p>
         <p class="helper" id="batch-export-status" role="status" aria-live="polite"></p>
       </div>
       <div class="explain"><h3>What this tells you</h3><p id="scope">The ID checksum can flag many common typing errors. A valid checksum does not prove the number was issued or belongs to anyone.</p></div>

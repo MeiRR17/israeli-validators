@@ -78,7 +78,22 @@ function renderBatch(){
     }
     head.append(headerRow);table.append(head);
     const body=document.createElement('tbody');
-    for(const row of data.rows){
+    const invalidOnly=$('invalid-only').checked;
+    const visibleRows=invalidOnly?data.rows.filter(row=>!row.valid):data.rows;
+    if(invalidOnly){
+      const filterNotice=document.createElement('p');
+      filterNotice.textContent='Showing '+visibleRows.length+' failing line(s) of '+
+        data.total+' checked. Summary and exports still include every checked line.';
+      pane.append(filterNotice);
+    }
+    if(!visibleRows.length){
+      const tr=document.createElement('tr');
+      const cell=document.createElement('td');
+      cell.colSpan=3;
+      cell.textContent='No failing lines in this batch.';
+      tr.append(cell);body.append(tr);
+    }
+    for(const row of visibleRows){
       const tr=document.createElement('tr');
       for(const [index,value] of [String(row.line),row.valid?'Passes format/checksum':'Does not pass',row.reason||'—'].entries()){
         const cell=document.createElement('td');
@@ -131,6 +146,7 @@ $('kind').addEventListener('change',()=>{
   $('entry').value='';
   $('batch-entry').value='';
   $('show-sensitive').checked=false;
+  $('invalid-only').checked=false;
   $('entry').placeholder=notes[kind].placeholder;
   $('field-note').textContent=notes[kind].desc;
   $('scope').textContent=notes[kind].scope;
@@ -153,6 +169,10 @@ $('entry').addEventListener('keydown',event=>{
   if(event.key==='Enter'){event.preventDefault();render();}
 });
 $('batch-entry').addEventListener('input',empty);
+$('invalid-only').addEventListener('change',()=>{
+  // Render only redacted row metadata; never rebuild the full-value result.
+  if(currentMode()==='batch'&&lastRedacted)renderBatch();
+});
 $('entry').addEventListener('input',()=>{
   // Disclosure is specific to the current result, never to future values.
   $('show-sensitive').checked=false;
@@ -162,6 +182,7 @@ $('clear').addEventListener('click',()=>{
   $('entry').value='';
   $('batch-entry').value='';
   $('show-sensitive').checked=false;
+  $('invalid-only').checked=false;
   empty();(currentMode()==='batch'?$('batch-entry'):$('entry')).focus();
 });
 
