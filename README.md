@@ -1,6 +1,6 @@
 # Israeli Validators
 
-Dependency-free JavaScript input validators for Israeli ID checksums, Israeli IBAN checksums, phone formats and seven-digit postal-code formats. Includes an interactive **local-only browser studio**.
+Dependency-free JavaScript input validators for Israeli ID checksums, Israeli IBAN checksums, mobile/general/fixed-line phone formats and seven-digit postal-code formats. Includes an interactive **local-only browser studio**.
 
 **Important:** A valid checksum or format does **not** establish a person's identity, account existence, ownership, active phone number or postal address. Use these utilities for client-side input feedback, not identity or payment verification.
 
@@ -16,10 +16,11 @@ Open http://localhost:8000. Choose a format and enter a non-sensitive sample val
 
 Requires modern JavaScript with ES modules; Node.js 22+ is recommended.
 
-    import { validateIsraeliId, validateIsraeliIban, validateIsraeliMobile, validateIsraeliPhone, validateIsraeliPostalCode, validate } from './src/index.js';
+    import { validateIsraeliId, validateIsraeliIban, validateIsraeliMobile, validateIsraeliPhone, validateIsraeliLandline, validateIsraeliPostalCode, validate } from './src/index.js';
 
     const id = validateIsraeliId('000000000');
     const phone = validateIsraeliMobile('050-1234567');
+    const landline = validateIsraeliLandline('02-1234567');
     const postal = validateIsraeliPostalCode('1234567');
     const generic = validate('0501234567', 'mobile');
 
@@ -60,6 +61,7 @@ Batch mode can download `validation-audit-counts.json`. It contains the selected
 - **Israeli IBAN:** syntax beginning with IL and 21 digits, plus international modulo-97 check. Exposes three-digit bank, three-digit branch and thirteen-digit account fields; it cannot confirm the bank/account exists.
 - **Mobile:** common 10-digit local format starting 05, including +972/00972 normalization. Prefix assignment and reachability are not checked.
 - **Telephone:** common cellular, 07 and 02/03/04/08/09 formats. This is a narrow syntax check and is not exhaustive for Israeli telecom numbering.
+- **Fixed-line (`landline`):** the 02/03/04/08/09 nine-digit local numbering shape, with optional `+972`/`00972` normalization. The stricter validator excludes cellular 05 and 07 ranges; it does not establish the physical line type or check allocation, number portability or reachability. Available in both single and privacy-redacted batch modes.
 - **Postal:** modern seven-digit numeric format only. Does not confirm code allocation or physical delivery addresses.
 
 The library deliberately does not claim official integration with the Population and Immigration Authority, Postal Company, telecom carriers or banking networks. No database checks or government endpoints are contacted.

@@ -7,6 +7,7 @@ const notes={
   iban:{placeholder:'IL followed by 21 digits',desc:'Israeli IBAN: IL, two check digits, three-digit bank and branch codes, and a 13-digit account field.',scope:'The IBAN mod-97 checksum validates structure; it cannot establish that a bank or account exists, is active or belongs to a particular person.'},
   mobile:{placeholder:'05X-XXXXXXX or +9725X…',desc:'Basic 10-digit cellular format, optionally with the +972 or 00972 country prefix.',scope:'A mobile format check cannot prove that a number is assigned, reachable, or owned by a person.'},
   phone:{placeholder:'02-XXXXXXX, 05X-XXXXXXX…',desc:'Basic landline, cellular and 07X format checks; does not check number allocation.',scope:'Phone formatting checks do not verify allocation, carrier status, porting, reachability or active service.'},
+  landline:{placeholder:'02-1234567 or +972-2-1234567',desc:'Fixed-line numbering shape: 02, 03, 04, 08 or 09 and seven further digits. Mobile 05 and 07 ranges are excluded.',scope:'This is a narrow fixed-line format check only. It does not verify allocation, actual line type, routing, portability or reachability.'},
   postal:{placeholder:'Seven-digit postal code',desc:'Modern seven-digit Israeli postal-code shape; it does not verify a physical address.',scope:'Seven digits are a structural format, not proof that the code exists or matches a particular street or building.'},
 };
 function resultDetail(name,value){

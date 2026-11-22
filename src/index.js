@@ -99,6 +99,17 @@ export function validateIsraeliPhone(value) {
   return { valid, normalized, reason: valid ? null : 'invalid_phone_format' };
 }
 
+/**
+ * Strict local fixed-line numbering shape: 02/03/04/08/09 followed by
+ * seven digits. Deliberately excludes 05 mobile and 07 service/VoIP ranges.
+ * This does NOT verify allocation, reachability, or number portability.
+ */
+export function validateIsraeliLandline(value) {
+  const normalized = normalizeIsraeliPhone(value);
+  const valid = normalized !== null && /^0[23489]\d{7}$/.test(normalized);
+  return { valid, normalized, reason: valid ? null : 'invalid_landline_format' };
+}
+
 /** Modern Israeli postal code format: exactly seven decimal digits. */
 export function validateIsraeliPostalCode(value) {
   const normalized = noWhitespace(value);
@@ -111,6 +122,7 @@ export const validators = Object.freeze({
   iban: validateIsraeliIban,
   mobile: validateIsraeliMobile,
   phone: validateIsraeliPhone,
+  landline: validateIsraeliLandline,
   postal: validateIsraeliPostalCode,
 });
 

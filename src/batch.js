@@ -10,7 +10,7 @@ const MAX_LENGTH = 10_000;
 
 /**
  * @param {string} lines One input per newline, with empty lines ignored.
- * @param {'id'|'iban'|'mobile'|'phone'|'postal'} kind
+ * @param {'id'|'iban'|'mobile'|'phone'|'landline'|'postal'} kind
  * @returns {{kind:string,total:number,passed:number,failed:number,rows:Array<object>}}
  */
 export function validateBatch(lines, kind) {
