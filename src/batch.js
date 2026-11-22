@@ -179,3 +179,45 @@ export function redactedBatchCsv(result) {
   }
   return '\uFEFF' + lines.join('\r\n') + '\r\n';
 }
+
+
+/**
+ * Spreadsheet-friendly aggregate report from a direct counts-only audit.
+ * No entered identifiers, normalized values, per-line results or positions.
+ * All output cells are bounded numbers or fixed-format ASCII codes.
+ */
+export function batchAuditCsv(audit) {
+  if (!audit || typeof audit !== 'object' ||
+      audit.format !== 'israeli-validators-batch-audit-v1' ||
+      !Object.hasOwn(validators, audit.kind) ||
+      ![audit.total, audit.passed, audit.failed].every(n =>
+        Number.isSafeInteger(n) && n >= 0 && n <= MAX_ENTRIES) ||
+      audit.total < 1 || audit.passed + audit.failed !== audit.total ||
+      !Array.isArray(audit.invalidReasons) ||
+      audit.invalidReasons.length > MAX_ENTRIES) {
+    throw new TypeError('Expected a bounded aggregate validation audit.');
+  }
+  const seen = new Set();
+  let reasonsTotal = 0;
+  for (const entry of audit.invalidReasons) {
+    if (!entry || typeof entry !== 'object' ||
+        typeof entry.reason !== 'string' ||
+        !/^[a-z0-9_]{1,80}$/u.test(entry.reason) ||
+        seen.has(entry.reason) ||
+        !Number.isSafeInteger(entry.count) || entry.count < 1 ||
+        entry.count > MAX_ENTRIES) {
+      throw new TypeError('Invalid aggregate failure reason.');
+    }
+    seen.add(entry.reason);
+    reasonsTotal += entry.count;
+  }
+  if (reasonsTotal !== audit.failed) {
+    throw new TypeError('Aggregate failure counts do not reconcile.');
+  }
+  const lines = ['kind,total,passed,failed,reason,count'];
+  const reasons = audit.invalidReasons.length ? audit.invalidReasons : [{ reason: '', count: 0 }];
+  for (const { reason, count } of reasons) {
+    lines.push([audit.kind, audit.total, audit.passed, audit.failed, reason, count].join(','));
+  }
+  return '\uFEFF' + lines.join('\r\n') + '\r\n';
+}

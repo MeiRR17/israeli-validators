@@ -52,6 +52,10 @@ The browser can also download `validation-line-results-redacted.csv` with only t
 
 Even redacted line numbers and failure patterns can be sensitive, so review the file before sharing. Editing input invalidates the prior export until batch results are recalculated.
 
+### Counts-only CSV audit
+
+Batch mode also supports **Download counts-only CSV**, built from the existing direct `auditBatchInput()` result. The file includes the validation type, total/passed/failed counts and one row per sanitized failure-reason code; a fully passing batch yields one row with an empty reason and zero reason count. No submitted or normalized values, individual results, original line numbers or user-controlled text are serialized. The serializer `batchAuditCsv(audit)` strictly revalidates bounded aggregates and reconciles failure-reason totals before producing a UTF-8 BOM + CRLF spreadsheet file with fixed numeric and lowercase ASCII code cells. The result is a report, **not a restorable input list**. Aggregate failure patterns may still reveal sensitive business activity.
+
 ### Counts-only audit report
 
 Batch mode can download `validation-audit-counts.json`. It contains the selected validation kind, counts of passed/failed inputs and a per-reason failure breakdown. It contains **no submitted values**, no normalized identifiers and no per-line record details.
@@ -85,7 +89,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 ## Files
 
 - `src/index.js` — normalization, input format checks and arithmetic checksums
-- `src/batch.js` — bounded bulk checking, redacted display rows, redacted per-line CSV export, direct aggregate-only audit and count-only summaries
+- `src/batch.js` — bounded bulk checking, redacted display rows, per-line CSV export, direct aggregate-only audit and counts-only CSV/JSON summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
 - `LICENSE` — MIT

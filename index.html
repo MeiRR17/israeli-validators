@@ -50,8 +50,9 @@
       <div id="batch-results" class="batch-results" hidden></div>
       <div id="batch-audit-actions" class="batch-audit-actions" hidden>
         <button type="button" id="download-audit" class="button secondary" disabled>↓ Download counts-only JSON report</button>
+        <button type="button" id="download-audit-csv" class="button secondary" disabled>↓ Download counts-only CSV</button>
         <button type="button" id="download-redacted" class="button secondary" disabled>↓ Download redacted line results CSV</button>
-        <p class="helper">The batch results also provide an expandable counts-only failure-reason breakdown. JSON contains aggregate counts and reasons only. CSV contains original input line numbers, pass/fail status and reason codes, but no entered or normalized values. Line locations can still be sensitive.</p>
+        <p class="helper">The batch results also provide an expandable counts-only failure-reason breakdown. JSON and Counts CSV include only aggregate counts and reasons. The separate redacted line-results CSV contains original input line numbers, pass/fail status and reason codes, but no entered or normalized values. Even aggregate counts and line locations can be sensitive.</p>
         <p class="helper" id="batch-export-status" role="status" aria-live="polite"></p>
       </div>
       <div class="explain"><h3>What this tells you</h3><p id="scope">The ID checksum can flag many common typing errors. A valid checksum does not prove the number was issued or belongs to anyone.</p></div>

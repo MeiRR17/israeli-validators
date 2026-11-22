@@ -1,5 +1,5 @@
 import {validate} from './src/index.js';
-import {validateBatchRedacted,batchSummary,auditBatchInput,redactedBatchCsv} from './src/batch.js';
+import {validateBatchRedacted,batchSummary,auditBatchInput,redactedBatchCsv,batchAuditCsv} from './src/batch.js';
 const $=id=>document.getElementById(id);
 let lastAudit=null;
 let lastRedacted=null;
@@ -23,6 +23,7 @@ function empty(){
   lastRedacted=null;
   $('batch-export-status').textContent='';
   $('download-redacted').disabled=true;
+  $('download-audit-csv').disabled=true;
   $('batch-audit-actions').hidden=true;
   $('download-audit').disabled=true;
   $('batch-results').hidden=true;
@@ -114,6 +115,7 @@ function renderBatch(){
     pane.hidden=false;
     $('batch-audit-actions').hidden=false;
     $('download-audit').disabled=false;
+    $('download-audit-csv').disabled=false;
     $('download-redacted').disabled=false;
   }catch(error){
     empty();
@@ -177,6 +179,22 @@ $('download-audit').addEventListener('click',()=>{
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 
+$('download-audit-csv').addEventListener('click',()=>{
+  if(!lastAudit || $('download-audit-csv').disabled)return;
+  try{
+    const csv=batchAuditCsv(lastAudit);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;link.download='validation-audit-counts.csv';
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    $('batch-export-status').textContent='Counts-only CSV downloaded: no identifiers or input line numbers included.';
+  }catch{
+    $('download-audit-csv').disabled=true;
+    $('batch-export-status').textContent='Counts-only CSV export failed. Re-run the batch check before retrying.';
+  }
+});
 $('download-redacted').addEventListener('click',()=>{
   if(!lastRedacted)return;
   try{
