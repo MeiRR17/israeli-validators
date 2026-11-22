@@ -50,7 +50,7 @@ The browser can also download `validation-line-results-redacted.csv` with only t
     const safeRows = validateBatchRedacted('000000000\\n123456789', 'id');
     const csv = redactedBatchCsv(safeRows);
 
-Even redacted line numbers and failure patterns can be sensitive, so review the file before sharing. Editing input invalidates the prior export until batch results are recalculated.
+Even redacted line numbers and failure patterns can be sensitive, so review the file before sharing. Editing input invalidates the prior export until batch results are recalculated. Library-provided or mutated result objects now fail closed when the validator kind is unsupported, aggregate totals do not reconcile, the number of rows differs from the claimed total, pass/fail booleans disagree with their counts, or source line numbers are duplicated, non-increasing or out of range. This shared check protects both `batchAudit()` and `redactedBatchCsv()` without inspecting or exporting original identifier values.
 
 ### Counts-only CSV audit
 

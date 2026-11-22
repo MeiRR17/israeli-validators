@@ -72,9 +72,12 @@ export function validateBatchRedacted(lines, kind) {
 
 /** Privacy-preserving summary containing counts, not source identifiers. */
 export function batchSummary(result) {
-  if (!result || !Number.isInteger(result.total) ||
-      !Number.isInteger(result.passed) || !Number.isInteger(result.failed)) {
-    throw new TypeError('Expected a bulk validation result.');
+  if (!result || typeof result !== 'object' ||
+      !Object.hasOwn(validators, result.kind) ||
+      ![result.total, result.passed, result.failed].every(n =>
+        Number.isSafeInteger(n) && n >= 0 && n <= MAX_ENTRIES) ||
+      result.total < 1 || result.passed + result.failed !== result.total) {
+    throw new TypeError('Expected a consistent bounded bulk validation result.');
   }
   return {
     kind: result.kind,
@@ -84,16 +87,40 @@ export function batchSummary(result) {
   };
 }
 
+/**
+ * Validate public/library-supplied result objects before deriving exports.
+ * The same monotonic source-line and aggregate-count contract applies to
+ * full and redacted results, without ever reading source identifier values.
+ */
+function checkedBatchRows(result) {
+  const summary = batchSummary(result);
+  if (!Array.isArray(result.rows) || result.rows.length !== summary.total) {
+    throw new TypeError('Batch row count does not match the summary.');
+  }
+  let passed = 0;
+  let previousLine = 0;
+  for (const row of result.rows) {
+    if (!row || typeof row !== 'object' || typeof row.valid !== 'boolean' ||
+        !Number.isSafeInteger(row.line) || row.line <= previousLine ||
+        row.line > MAX_LENGTH) {
+      throw new TypeError('Batch rows require distinct, increasing source line numbers and boolean results.');
+    }
+    previousLine = row.line;
+    if (row.valid) passed++;
+  }
+  if (passed !== summary.passed) {
+    throw new TypeError('Batch pass/fail counts do not reconcile with the rows.');
+  }
+  return summary;
+}
+
 
 /**
  * Counts-only analysis of invalid reasons. No raw input, normalized
  * identifiers, source line numbers or account data are included.
  */
 export function batchAudit(result) {
-  if (!result || !Array.isArray(result.rows)) {
-    throw new TypeError('Expected a batch validation result.');
-  }
-  const summary = batchSummary(result);
+  const summary = checkedBatchRows(result);
   const reasons = Object.create(null);
   for (const item of result.rows) {
     if (!item.valid) {
@@ -160,18 +187,9 @@ export function auditBatchInput(lines, kind) {
  * Line numbers still expose which input positions failed, so review before sharing.
  */
 export function redactedBatchCsv(result) {
-  if (!result || typeof result !== 'object' || !Array.isArray(result.rows) ||
-      !Number.isInteger(result.total) || result.total !== result.rows.length ||
-      result.total < 1 || result.total > MAX_ENTRIES ||
-      !Object.hasOwn(validators, result.kind)) {
-    throw new TypeError('Expected a bounded redacted batch validation result.');
-  }
+  checkedBatchRows(result);
   const lines = ['line,valid,reason'];
   for (const row of result.rows) {
-    if (!row || !Number.isInteger(row.line) || row.line < 1 || row.line > MAX_LENGTH ||
-        typeof row.valid !== 'boolean') {
-      throw new TypeError('Invalid redacted validation row.');
-    }
     const reason = row.valid ? '' :
       typeof row.reason === 'string' && /^[a-z0-9_]{1,80}$/u.test(row.reason)
         ? row.reason : 'other_invalid';
