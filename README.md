@@ -42,6 +42,16 @@ For on-screen results that should never contain identifiers in the returned row 
 
 The browser's batch table now uses this redacted API rather than constructing `validateBatch()` objects with original and normalized values. Identifiers remain in the user's input control until cleared; the browser also constructs a separate direct counts-only audit for download. The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
 
+### Redacted per-line CSV export
+
+The browser can also download `validation-line-results-redacted.csv` with only the original nonempty input **line numbers**, boolean results, and bounded reason codes; the input and normalized identifiers are never added to the CSV. This is separate from the counts-only JSON audit and preserves blank-line positions. A direct library helper exports sanitized fields without copying arbitrary row properties:
+
+    import { validateBatchRedacted, redactedBatchCsv } from './src/batch.js';
+    const safeRows = validateBatchRedacted('000000000\\n123456789', 'id');
+    const csv = redactedBatchCsv(safeRows);
+
+Even redacted line numbers and failure patterns can be sensitive, so review the file before sharing. Editing input invalidates the prior export until batch results are recalculated.
+
 ### Counts-only audit report
 
 Batch mode can download `validation-audit-counts.json`. It contains the selected validation kind, counts of passed/failed inputs and a per-reason failure breakdown. It contains **no submitted values**, no normalized identifiers and no per-line record details.
@@ -75,7 +85,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 ## Files
 
 - `src/index.js` — normalization, input format checks and arithmetic checksums
-- `src/batch.js` — bounded bulk checking, redacted display rows, direct aggregate-only audit and count-only summaries
+- `src/batch.js` — bounded bulk checking, redacted display rows, redacted per-line CSV export, direct aggregate-only audit and count-only summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
 - `LICENSE` — MIT

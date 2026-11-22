@@ -152,3 +152,30 @@ export function auditBatchInput(lines, kind) {
     advisory: 'Format/checksum validation only; no real-world issuance or ownership verified.',
   };
 }
+
+/**
+ * Spreadsheet-friendly, privacy-reduced per-line outcomes. Unlike the full
+ * validateBatch() result, this explicitly selects only safe scalar fields:
+ * neither raw values nor normalized IDs are written to the exported CSV.
+ * Line numbers still expose which input positions failed, so review before sharing.
+ */
+export function redactedBatchCsv(result) {
+  if (!result || typeof result !== 'object' || !Array.isArray(result.rows) ||
+      !Number.isInteger(result.total) || result.total !== result.rows.length ||
+      result.total < 1 || result.total > MAX_ENTRIES ||
+      !Object.hasOwn(validators, result.kind)) {
+    throw new TypeError('Expected a bounded redacted batch validation result.');
+  }
+  const lines = ['line,valid,reason'];
+  for (const row of result.rows) {
+    if (!row || !Number.isInteger(row.line) || row.line < 1 || row.line > MAX_LENGTH ||
+        typeof row.valid !== 'boolean') {
+      throw new TypeError('Invalid redacted validation row.');
+    }
+    const reason = row.valid ? '' :
+      typeof row.reason === 'string' && /^[a-z0-9_]{1,80}$/u.test(row.reason)
+        ? row.reason : 'other_invalid';
+    lines.push(row.line + ',' + (row.valid ? 'true' : 'false') + ',' + reason);
+  }
+  return '\uFEFF' + lines.join('\r\n') + '\r\n';
+}

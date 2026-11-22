@@ -1,7 +1,8 @@
 import {validate} from './src/index.js';
-import {validateBatchRedacted,batchSummary,auditBatchInput} from './src/batch.js';
+import {validateBatchRedacted,batchSummary,auditBatchInput,redactedBatchCsv} from './src/batch.js';
 const $=id=>document.getElementById(id);
 let lastAudit=null;
+let lastRedacted=null;
 const notes={
   id:{placeholder:'e.g. 000000000',desc:'Israeli ID numbers may contain up to nine digits; leading zeroes are supported.',scope:'The ID checksum flags many common typing errors. A valid checksum does not prove that a number was issued or belongs to anyone.'},
   iban:{placeholder:'IL followed by 21 digits',desc:'Israeli IBAN: IL, two check digits, three-digit bank and branch codes, and a 13-digit account field.',scope:'The IBAN mod-97 checksum validates structure; it cannot establish that a bank or account exists, is active or belongs to a particular person.'},
@@ -19,6 +20,8 @@ function resultDetail(name,value){
 function currentMode(){return document.querySelector('input[name="check-mode"]:checked')?.value||'single';}
 function empty(){
   lastAudit=null;
+  lastRedacted=null;
+  $('download-redacted').disabled=true;
   $('batch-audit-actions').hidden=true;
   $('download-audit').disabled=true;
   $('batch-results').hidden=true;
@@ -59,6 +62,7 @@ function renderBatch(){
     const summary=batchSummary(data);
     // A separate direct counts-only export avoids retaining identifier-bearing rows.
     lastAudit=auditBatchInput($('batch-entry').value,$('kind').value);
+    lastRedacted=data;
     const heading=document.createElement('h3');
     heading.textContent='Batch results: '+summary.passed+' passed, '+summary.failed+
       ' did not pass (out of '+summary.total+').';
@@ -87,6 +91,7 @@ function renderBatch(){
     pane.hidden=false;
     $('batch-audit-actions').hidden=false;
     $('download-audit').disabled=false;
+    $('download-redacted').disabled=false;
   }catch(error){
     empty();
     $('result').replaceChildren();
@@ -147,4 +152,23 @@ $('download-audit').addEventListener('click',()=>{
   link.click();
   link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
+$('download-redacted').addEventListener('click',()=>{
+  if(!lastRedacted)return;
+  try{
+    const csv=redactedBatchCsv(lastRedacted);
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='validation-line-results-redacted.csv';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(error){
+    $('download-redacted').disabled=true;
+    message('ייצוא תוצאות הבדיקה נכשל: '+error.message,true);
+  }
 });
