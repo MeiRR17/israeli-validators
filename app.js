@@ -21,6 +21,7 @@ function currentMode(){return document.querySelector('input[name="check-mode"]:c
 function empty(){
   lastAudit=null;
   lastRedacted=null;
+  $('batch-export-status').textContent='';
   $('download-redacted').disabled=true;
   $('batch-audit-actions').hidden=true;
   $('download-audit').disabled=true;
@@ -86,7 +87,29 @@ function renderBatch(){
       }
       body.append(tr);
     }
-    table.append(body);pane.append(heading,caution,table);
+    table.append(body);
+    // Show the direct, counts-only audit in the browser. Reason strings are
+    // restricted to the library's stable reason-code vocabulary and written
+    // using textContent; the input values never enter this panel.
+    const breakdown=document.createElement('details');
+    breakdown.className='batch-reason-breakdown';
+    const summaryLabel=document.createElement('summary');
+    summaryLabel.textContent='Failure reasons ('+summary.failed+' invalid of '+summary.total+' checked)';
+    breakdown.append(summaryLabel);
+    if(lastAudit.invalidReasons.length){
+      const list=document.createElement('ul');
+      for(const item of lastAudit.invalidReasons){
+        const line=document.createElement('li');
+        line.textContent=item.reason+': '+item.count;
+        list.append(line);
+      }
+      breakdown.append(list);
+    }else{
+      const emptyReasons=document.createElement('p');
+      emptyReasons.textContent='No invalid values in this batch.';
+      breakdown.append(emptyReasons);
+    }
+    pane.append(heading,caution,breakdown,table);
     $('result').hidden=true;
     pane.hidden=false;
     $('batch-audit-actions').hidden=false;
@@ -169,6 +192,8 @@ $('download-redacted').addEventListener('click',()=>{
     setTimeout(()=>URL.revokeObjectURL(url),1000);
   }catch(error){
     $('download-redacted').disabled=true;
-    message('ייצוא תוצאות הבדיקה נכשל: '+error.message,true);
+    // Do not throw a second exception from an undefined error handler.
+    // Keep the entered identifiers out of the diagnostic display.
+    $('batch-export-status').textContent='Redacted CSV export failed. Re-run the batch check before retrying.';
   }
 });

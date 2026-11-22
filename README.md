@@ -40,7 +40,7 @@ For on-screen results that should never contain identifiers in the returned row 
     const display = validateBatchRedacted('000000000\n123456789', 'id');
     // Each row has only { line, valid, reason }.
 
-The browser's batch table now uses this redacted API rather than constructing `validateBatch()` objects with original and normalized values. Identifiers remain in the user's input control until cleared; the browser also constructs a separate direct counts-only audit for download. The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
+The browser's batch table now uses this redacted API rather than constructing `validateBatch()` objects with original and normalized values. Identifiers remain in the user's input control until cleared; the browser also constructs a separate direct counts-only audit for download. A new **Failure reasons** disclosure summarizes counts by sanitized failure code using that same direct audit; it never renders entered or normalized identifiers. For a fully passing batch it explicitly reports that there are no invalid values. Errors during redacted CSV export now display a non-sensitive retry message rather than failing inside the error handler. The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
 
 ### Redacted per-line CSV export
 
