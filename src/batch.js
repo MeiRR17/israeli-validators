@@ -39,6 +39,37 @@ export function validateBatch(lines, kind) {
   return { kind, total: rows.length, passed, failed: rows.length - passed, rows };
 }
 
+
+/**
+ * Display-safe batch inspection: only source line numbers, boolean outcomes
+ * and bounded reason codes leave this function. Unlike validateBatch(), no
+ * returned row contains the entered value or a normalized identifier.
+ *
+ * This does not erase the caller's input string or validate real-world
+ * identity, account existence or phone number allocation.
+ */
+export function validateBatchRedacted(lines, kind) {
+  if (typeof lines !== 'string' || lines.length > MAX_LENGTH) {
+    throw new RangeError('Bulk input must be text of at most 10,000 characters.');
+  }
+  if (!Object.hasOwn(validators, kind)) throw new RangeError('Unsupported input type.');
+  const rows = [];
+  let passed = 0;
+  for (const [index, raw] of lines.split(/\r\n?|\n/u).entries()) {
+    const value = raw.trim();
+    if (!value) continue;
+    if (rows.length >= MAX_ENTRIES) throw new RangeError('Enter no more than 100 non-empty lines.');
+    const outcome = validate(value, kind);
+    if (outcome.valid) passed++;
+    const reason = !outcome.valid && typeof outcome.reason === 'string' &&
+      /^[a-z0-9_]{1,80}$/u.test(outcome.reason)
+      ? outcome.reason : outcome.valid ? null : 'other_invalid';
+    rows.push({ line: index + 1, valid: outcome.valid === true, reason });
+  }
+  if (!rows.length) throw new RangeError('Enter one or more values.');
+  return { kind, total: rows.length, passed, failed: rows.length - passed, rows };
+}
+
 /** Privacy-preserving summary containing counts, not source identifiers. */
 export function batchSummary(result) {
   if (!result || !Number.isInteger(result.total) ||

@@ -33,7 +33,13 @@ Each validator returns an object with `valid`, `normalized`, and `reason`, plus 
 
 This function accepts **1–100 nonempty lines**, up to **10,000 characters** total, and returns one result per input with line number, validation outcome and reason. Input values are returned to the programmatic caller as part of the rows so the calling code can associate the outcome; do not log or persist them accidentally. The browser UI purposely does not display the input values in its batch results and does not export or upload submitted identifiers.
 
-The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
+For on-screen results that should never contain identifiers in the returned row objects, use `validateBatchRedacted()`:
+
+    import { validateBatchRedacted } from './src/batch.js';
+    const display = validateBatchRedacted('000000000\n123456789', 'id');
+    // Each row has only { line, valid, reason }.
+
+The browser's batch table now uses this redacted API rather than constructing `validateBatch()` objects with original and normalized values. Identifiers remain in the user's input control until cleared; the browser also constructs a separate direct counts-only audit for download. The count-only summary excludes input values. Like single checks, passing a checksum is not proof of identity, account existence or delivery.
 
 ### Counts-only audit report
 
@@ -67,7 +73,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 ## Files
 
 - `src/index.js` — normalization, input format checks and arithmetic checksums
-- `src/batch.js` — bounded, local-only bulk checking, direct aggregate-only audit and count-only summaries
+- `src/batch.js` — bounded bulk checking, redacted display rows, direct aggregate-only audit and count-only summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
 - `LICENSE` — MIT
