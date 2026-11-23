@@ -16,12 +16,13 @@ Open http://localhost:8000. Choose a format and enter a non-sensitive sample val
 
 Requires modern JavaScript with ES modules; Node.js 22+ is recommended.
 
-    import { validateIsraeliId, validateIsraeliIban, validateIsraeliMobile, validateIsraeliPhone, validateIsraeliLandline, validateIsraeliPostalCode, validate } from './src/index.js';
+    import { validateIsraeliId, validateIsraeliIban, validateIsraeliMobile, validateIsraeliPhone, validateIsraeliLandline, validateIsraeliPostalCode, validateIsraeliDate, validate } from './src/index.js';
 
     const id = validateIsraeliId('000000000');
     const phone = validateIsraeliMobile('050-1234567');
     const landline = validateIsraeliLandline('02-1234567');
     const postal = validateIsraeliPostalCode('1234567');
+    const date = validateIsraeliDate('31/12/2026');
     const generic = validate('0501234567', 'mobile');
 
 Each validator returns an object with `valid`, `normalized`, and `reason`, plus optional structural fields for Israeli IBAN. The caller must not treat `valid: true` as proof of real-world issuance or account ownership.
@@ -77,6 +78,7 @@ Batch mode can download `validation-audit-counts.json`. It contains the selected
 - **Telephone:** common cellular, 07 and 02/03/04/08/09 formats. This is a narrow syntax check and is not exhaustive for Israeli telecom numbering.
 - **Fixed-line (`landline`):** the 02/03/04/08/09 nine-digit local numbering shape, with optional `+972`/`00972` normalization. The stricter validator excludes cellular 05 and 07 ranges; it does not establish the physical line type or check allocation, number portability or reachability. Available in both single and privacy-redacted batch modes.
 - **Postal:** modern seven-digit numeric format only. Does not confirm code allocation or physical delivery addresses.
+- **Date:** strict Gregorian calendar date using day-first `DD/MM/YYYY`, `DD.MM.YYYY`, `DD-MM-YYYY` or ISO `YYYY-MM-DD`; returns normalized ISO date. It rejects impossible dates (including invalid leap days), two-digit years, mixed separators and ambiguous compact numeric strings. It does not assess age, eligibility, identity or the truth of a claimed date of birth. Available in single and privacy-redacted batch modes.
 
 The library deliberately does not claim official integration with the Population and Immigration Authority, Postal Company, telecom carriers or banking networks. No database checks or government endpoints are contacted.
 
@@ -88,7 +90,7 @@ This is an implementation-only delivery. **Automated tests and external interope
 
 ## Files
 
-- `src/index.js` — normalization, input format checks and arithmetic checksums
+- `src/index.js` — normalization, input format checks, date validation and arithmetic checksums
 - `src/batch.js` — bounded bulk checking, redacted display rows, per-line CSV export, direct aggregate-only audit and counts-only CSV/JSON summaries
 - `index.html`, `app.js`, `styles.css` — local demonstration and accessible UI
 - `package.json` — ES module metadata
