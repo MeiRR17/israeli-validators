@@ -122,16 +122,19 @@ export function validateIsraeliDate(value) {
   }
   const input = value.trim();
   let year, month, day;
-  let match = /^(\\d{4})-(\\d{2})-(\\d{2})$/u.exec(input);
+  let match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(input);
   if (match) {
     [, year, month, day] = match;
   } else {
-    match = /^(\\d{2})[/.\\-](\\d{2})[/.\\-](\\d{4})$/u.exec(input);
+    match = /^(\d{2})([/.\\-])(\d{2})\2(\d{4})$/u.exec(input);
     if (!match) return { valid: false, normalized: null, reason: 'invalid_date_format' };
-    [, day, month, year] = match;
+    [, day, , month, year] = match;
   }
   const y = Number(year), m = Number(month), d = Number(day);
-  const date = new Date(Date.UTC(y, m - 1, d));
+  // setUTCFullYear avoids Date.UTC's legacy 1900 offset for years 00–99.
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(y, m - 1, d);
   const valid = y >= 1 && y <= 9999 && date.getUTCFullYear() === y &&
     date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
   const normalized = valid
