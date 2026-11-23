@@ -110,6 +110,36 @@ export function validateIsraeliLandline(value) {
   return { valid, normalized, reason: valid ? null : 'invalid_landline_format' };
 }
 
+/**
+ * Validate a calendar date in unambiguous ISO YYYY-MM-DD or Israeli
+ * day-first DD/MM/YYYY, DD.MM.YYYY or DD-MM-YYYY notation.
+ * Returns a normalized ISO date; this checks Gregorian calendar validity,
+ * not age, eligibility, identity or whether a date is someone's real DOB.
+ */
+export function validateIsraeliDate(value) {
+  if (typeof value !== 'string') {
+    return { valid: false, normalized: null, reason: 'invalid_type' };
+  }
+  const input = value.trim();
+  let year, month, day;
+  let match = /^(\\d{4})-(\\d{2})-(\\d{2})$/u.exec(input);
+  if (match) {
+    [, year, month, day] = match;
+  } else {
+    match = /^(\\d{2})[/.\\-](\\d{2})[/.\\-](\\d{4})$/u.exec(input);
+    if (!match) return { valid: false, normalized: null, reason: 'invalid_date_format' };
+    [, day, month, year] = match;
+  }
+  const y = Number(year), m = Number(month), d = Number(day);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const valid = y >= 1 && y <= 9999 && date.getUTCFullYear() === y &&
+    date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+  const normalized = valid
+    ? String(y).padStart(4, '0') + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0')
+    : null;
+  return { valid, normalized, reason: valid ? null : 'invalid_calendar_date' };
+}
+
 /** Modern Israeli postal code format: exactly seven decimal digits. */
 export function validateIsraeliPostalCode(value) {
   const normalized = noWhitespace(value);
@@ -124,6 +154,7 @@ export const validators = Object.freeze({
   phone: validateIsraeliPhone,
   landline: validateIsraeliLandline,
   postal: validateIsraeliPostalCode,
+  date: validateIsraeliDate,
 });
 
 /** Stable utility for form validation based on a named supported check. */
