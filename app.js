@@ -10,6 +10,7 @@ const notes={
   phone:{placeholder:'02-XXXXXXX, 05X-XXXXXXX…',desc:'Basic landline, cellular and 07X format checks; does not check number allocation.',scope:'Phone formatting checks do not verify allocation, carrier status, porting, reachability or active service.'},
   landline:{placeholder:'02-1234567 or +972-2-1234567',desc:'Fixed-line numbering shape: 02, 03, 04, 08 or 09 and seven further digits. Mobile 05 and 07 ranges are excluded.',scope:'This is a narrow fixed-line format check only. It does not verify allocation, actual line type, routing, portability or reachability.'},
   postal:{placeholder:'Seven-digit postal code',desc:'Modern seven-digit Israeli postal-code shape; it does not verify a physical address.',scope:'Seven digits are a structural format, not proof that the code exists or matches a particular street or building.'},
+  date:{placeholder:'DD/MM/YYYY or YYYY-MM-DD',desc:'Gregorian calendar date: DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY or ISO YYYY-MM-DD. Date parts are checked strictly.',scope:'This checks date notation and calendar validity only. It does not establish age, eligibility, identity or whether the date is a genuine date of birth.'},
 };
 function resultDetail(name,value){
   const row=document.createElement('div');row.className='detail-row';
